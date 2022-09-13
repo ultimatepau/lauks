@@ -1,0 +1,16 @@
+@import "~bootstrap/scss/bootstrap";
+.custom-control {
+  z-index: 0;
+}
+.msg-success {
+  margin: 0;
+}
+.loading-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
