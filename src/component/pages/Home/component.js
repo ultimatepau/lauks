@@ -280,18 +280,6 @@ export default class Home extends PureComponent {
       <>
         <Helmet>
           <title>Lauks </title>
-          <meta name="title" content="Lauks" />
-          <meta name="description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
-
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://lauks.vercel.app/" />
-          <meta property="og:title" content="Lauks" />
-          <meta property="og:description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
-
-          <meta property="twitter:card" content="summary_large_image" />
-          <meta property="twitter:url" content="https://lauks.vercel.app/" />
-          <meta property="twitter:title" content="Lauks" />
-          <meta property="twitter:description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
         </Helmet>
         <div className="container">
           <Navbar toggleModalAdd={this._toggleModalAdd} />
