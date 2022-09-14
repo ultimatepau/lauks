@@ -24,7 +24,7 @@ export function getData() {
     dispatch({ type: 'GET_REQUEST' });
     axios({ url: '/list', baseURL: BASE_URL }).then(({ data: payload }) => {
       dispatch({
-        type: 'GET_SUCCESS', payload
+        type: 'GET_SUCCESS', payload: payload.reverse()
       })
     });
   }
