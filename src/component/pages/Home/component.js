@@ -97,14 +97,16 @@ export default class Home extends PureComponent {
     listUkuran: [],
     listArea: [],
     loadingCreate: false,
-    search: ''
+    search: '',
+    activeIdDelete: null,
+    activeIdUpdate: null
   }
   componentDidMount() {
     const { actions: { requestDataInit } } = this.props;
     requestDataInit();
   }
   componentWillReceiveProps({ home }) {
-    const { listUkuran, listArea, show, loadingCreate } = this.state;
+    const { listUkuran, listArea, show, loadingCreate, activeIdDelete, activeIdUpdate } = this.state;
 
     if (listUkuran.length === 0 && home?.sizes?.data?.length > 0) {
       const { sizes: { data } } = home, arrUkuran = [];
@@ -121,7 +123,10 @@ export default class Home extends PureComponent {
       })
       this.setState({ listArea: arrArea });
     }
-    if (show && home.create.data) this.setState({ show: false, showSuccess: true })
+    if (show && home.create.data) this.setState({ show: false, showSuccess: 'Sukses menambahkan data' })
+    if (activeIdDelete && home.delete.data) this.setState({ activeIdDelete: null, showSuccess: 'Sukses menghapus data' })
+    if (activeIdUpdate && home.update.data) this.setState({ show: false, activeIdUpdate: null, showSuccess: 'Sukses memperbaharui data' })
+
     if (loadingCreate !== home.create.fetching) {
       document.querySelectorAll('.mb-4')[4].style.display = 'none'
       this.setState({ loadingCreate: home.create.fetching })
@@ -132,9 +137,9 @@ export default class Home extends PureComponent {
     this.setState({ show: !show })
   }
   _handleSubmit = (value) => {
-    const current = dayjs(), { actions: { postData } } = this.props;
+    const current = dayjs(), { actions: { postData, updateData } } = this.props, { activeIdUpdate } = this.state;;
     const payload = {
-      uuid: v4(),
+      uuid: activeIdUpdate || v4(),
       komoditas: value?.Komoditas || '',
       area_provinsi: value?.Area?.value ? value.Area.value.split(',')[0] : '',
       area_kota: value?.Area?.value ? value.Area.value.split(',')[1].trim() : '',
@@ -143,7 +148,7 @@ export default class Home extends PureComponent {
       tgl_parsed: current.format('YYYY-MM-DDTHH:mm:ssZ[Z]'),
       timestamp: current.valueOf()
     }
-    postData(payload);
+    activeIdUpdate ? updateData(payload) : postData(payload);
   }
   _toggleSuccess = () => {
     const { showSuccess } = this.state, { actions: { getData } } = this.props;
@@ -154,10 +159,10 @@ export default class Home extends PureComponent {
   _renderModalSuccess = () => {
     const { showSuccess } = this.state;
     return (
-      <Modal isOpen={showSuccess} toggle={this._toggleSuccess}>
+      <Modal isOpen={Boolean(showSuccess)} toggle={this._toggleSuccess}>
         <ModalHeader toggle={this._toggleSuccess}>Sukses</ModalHeader>
         <ModalBody>
-          <p className="msg-success">Sukses menambahkan data</p>
+          <p className="msg-success">{showSuccess}</p>
         </ModalBody>
         <ModalFooter>
           <Button onClick={this._toggleSuccess} color="primary">OK</Button>
@@ -165,11 +170,43 @@ export default class Home extends PureComponent {
       </Modal>
     )
   }
+
+  _cancelDelete = () => this.setState({ activeIdDelete: null })
+  _confirmDelete = () => {
+    const { actions: { deleteData } } = this.props, { activeIdDelete } = this.state;
+    deleteData(activeIdDelete);
+  }
+
+  _renderModalConfirmDelete = () => {
+    const { activeIdDelete } = this.state, { home: { list: { data } } } = this.props;
+    const findData = data.find((_) => _.uuid === activeIdDelete);
+    return (
+      <Modal isOpen={Boolean(activeIdDelete)} toggle={this._cancelDelete}>
+        <ModalHeader toggle={this._cancelDelete}>Konfirmasi</ModalHeader>
+        <ModalBody>
+          <p className="msg-success">Apakah anda yakin akan menghapus data {findData?.komoditas} ?</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={this._cancelDelete} color="primary">Batal</Button>
+          <Button onClick={this._confirmDelete} color="primary">OK</Button>
+        </ModalFooter>
+      </Modal>
+    )
+  }
+
   _renderModalAdd = () => {
-    const { show, loadingCreate } = this.state;
+    const { show, loadingCreate, activeIdUpdate } = this.state, { home: { list:  { data } } } = this.props;
+    const cloneModel = Object.assign({}, model);
+    if (activeIdUpdate) {
+      const findData = data.find((_) => _.uuid === activeIdUpdate);
+      cloneModel.Komoditas.defaultValue = findData.komoditas;
+      cloneModel.Ukuran.defaultValue = findData.size;
+      cloneModel.Harga.defaultValue = findData.price;
+      cloneModel.Area.defaultValue = `${findData.area_provinsi}, ${findData.area_kota}`;
+    }
     return (
       <Modal isOpen={show} toggle={this._toggleModalAdd}>
-        <ModalHeader toggle={this._toggleModalAdd}>Tambah Data</ModalHeader>
+        <ModalHeader toggle={this._toggleModalAdd}>{`${activeIdUpdate ? 'Ubah' : 'Tambah'} Data`}</ModalHeader>
         <ModalBody>
           <JsonToForm model={model} onSubmit={this._handleSubmit} />
           <div className="col-sm-4 offset-sm-4">
@@ -189,6 +226,13 @@ export default class Home extends PureComponent {
   _handleSearch = ({ target: { value: search }}) => {
     this.setState({ search })
   }
+  _handleEdit = (row) => {
+    this.setState({ activeIdUpdate: row.uuid, show: true })
+  }
+
+  _handleDelete = (row) => {
+    this.setState({ activeIdDelete: row.uuid })
+  }
   render() {
     const { listUkuran, listArea, search } = this.state;
     const { home } = this.props;
@@ -202,6 +246,17 @@ export default class Home extends PureComponent {
         (_) => _.komoditas.toLowerCase().includes(search.toLowerCase()) || _.size.includes(search) || _.price.includes(search) || _.area_kota.toLowerCase().includes(search.toLowerCase()) || _.area_provinsi.toLowerCase().includes(search.toLowerCase())
       );
     }
+    const modifiedColumn = Object.assign([], columns);
+    modifiedColumn.push({
+      name: 'Aksi',
+      selector: row => (
+        <>
+          <Button onClick={this._handleEdit.bind(this, row)} size="sm" style={{ marginRight: 5 }} color="info">Ubah</Button>
+          <Button onClick={this._handleDelete.bind(this, row)} size="sm" color="danger">Hapus</Button>
+        </>
+      ),
+      allowOverflow: true
+    });
     return (
       <>
         <Helmet>
@@ -210,13 +265,13 @@ export default class Home extends PureComponent {
         <div className="container">
           <Navbar toggleModalAdd={this._toggleModalAdd} />
           <div className="row">
-            <div className="col-10 offset-1 col-md-12 offset-md-0 mt-4">
+            <div className="table-wrapper col-10 offset-1 col-md-12 offset-md-0 mt-4">
               <DataTable
                 title="Aneka Ikan"
                 pagination
                 subHeader
                 subHeaderComponent={<input value={search} onChange={this._handleSearch} placeholder="Cari data" className="form-control" />}
-                columns={columns}
+                columns={modifiedColumn}
                 data={dataFiltered}
                 progressPending={home?.list?.fetching}
                 progressComponent={
@@ -232,6 +287,7 @@ export default class Home extends PureComponent {
         {home.list.fetching && listArea.length === 0 && listUkuran.length === 0 && this._renderLoading()}
         {this._renderModalAdd()}
         {this._renderModalSuccess()}
+        {this._renderModalConfirmDelete()}
         <footer>
           <p>Yang ngoding <a href="https://github.com/ultimatepau">@ultimatepau</a></p>
         </footer>

@@ -37,3 +37,8 @@ footer {
   bottom: 0;
   width: 100%;
 }
+@media screen and (max-width: 767px) {
+  .table-wrapper {
+    padding-bottom: 60px;
+  } 
+}

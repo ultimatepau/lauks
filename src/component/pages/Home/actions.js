@@ -30,10 +30,34 @@ export function getData() {
   }
 }
 
+export function updateData(payload) {
+  return async (dispatch) => {
+    dispatch({ type: 'UPDATE_REQUEST' });
+    const data = { condition: { uuid: payload.uuid }, set: { ...payload, uuid: undefined } };
+    axios({ url: '/list', baseURL: BASE_URL, method: 'PUT', data }).then(() => {
+      dispatch({
+        type: 'UPDATE_SUCCESS'
+      })
+    });
+  }
+}
+
+export function deleteData(payload) {
+  return async (dispatch) => {
+    dispatch({ type: 'DELETE_REQUEST' });
+    const data = { condition: { uuid: payload } };
+    axios({ url: '/list', baseURL: BASE_URL, method: 'DELETE', data }).then(() => {
+      dispatch({
+        type: 'DELETE_SUCCESS'
+      })
+    });
+  }
+}
+
 export function postData(payload) {
   return async (dispatch) => {
     dispatch({ type: 'CREATE_REQUEST' });
-    axios({ url: '/list', baseURL: BASE_URL, method: 'POST', data: [payload] }).then(({ data: payload }) => {
+    axios({ url: '/list', baseURL: BASE_URL, method: 'POST', data: [payload] }).then(() => {
       dispatch({
         type: 'CREATE_SUCCESS'
       })

@@ -14,11 +14,51 @@ const initialState = {
   create: {
     fetching: false,
     data: null
-  }
+  },
+  delete: {
+    fetching: false,
+    data: null
+  },
+  update: {
+    fetching: false,
+    data: null
+  },
 };
 export default function reducer(state = initialState, action) {
   const { type, payload } = action;
   switch(type) {
+    case 'UPDATE_REQUEST':
+      return {
+        ...state,
+        update: {
+          fetching: true,
+          data: null
+        },
+      }
+    case 'UPDATE_SUCCESS':
+      return {
+        ...state,
+        update: {
+          fetching: false,
+          data: true
+        }
+      }
+    case 'DELETE_REQUEST':
+      return {
+        ...state,
+        delete: {
+          fetching: true,
+          data: null
+        },
+      }
+    case 'DELETE_SUCCESS':
+      return {
+        ...state,
+        delete: {
+          fetching: false,
+          data: true
+        }
+      }
     case 'GET_REQUEST':
       return {
         ...state,
@@ -26,7 +66,9 @@ export default function reducer(state = initialState, action) {
           fetching: true,
           data: []
         },
-        create: initialState.create
+        create: initialState.create,
+        delete: initialState.delete,
+        update: initialState.update
       }
     case 'GET_SUCCESS':
       return {
