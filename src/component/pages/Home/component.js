@@ -17,20 +17,20 @@ const model = {
   "Area": {
     "type": "select",
     "required": true,
-    "options": [ //use static json arry to get options
+    "options": [
     ],
   },
   "Ukuran": {
     "type": "select",
     "required": true,
-    "options": [ //use static json arry to get options
+    "options": [
     ],
   },
   "Harga": {
     "type": "Number",
     "required": true
   },
-  "Simpan": { // button submit
+  "Simpan": {
     "type": "submit",
   }
 }
@@ -201,7 +201,6 @@ export default class Home extends PureComponent {
       dataFiltered = dataFiltered.filter(
         (_) => _.komoditas.toLowerCase().includes(search.toLowerCase()) || _.size.includes(search) || _.price.includes(search) || _.area_kota.toLowerCase().includes(search.toLowerCase()) || _.area_provinsi.toLowerCase().includes(search.toLowerCase())
       );
-      // console.log(dataFilteredAdvanced)
     }
     return (
       <>
@@ -237,13 +236,6 @@ export default class Home extends PureComponent {
           <p>Yang ngoding <a href="https://github.com/ultimatepau">@ultimatepau</a></p>
         </footer>
       </>
-      // <div className="home-root">
-      //   {listArea.length > 0 && listUkuran.length > 0 && (
-      //     <button onClick={this._toggleModalAdd} type="button">
-      //       toggle
-      //     </button>
-      //   )}
-      // </div>
     )
   }
 }
