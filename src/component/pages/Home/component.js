@@ -127,14 +127,14 @@ export default class Home extends PureComponent {
     if (activeIdDelete && home.delete.data) this.setState({ activeIdDelete: null, showSuccess: 'Sukses menghapus data' })
     if (activeIdUpdate && home.update.data) this.setState({ show: false, activeIdUpdate: null, showSuccess: 'Sukses memperbaharui data' })
 
-    if (loadingCreate !== home.create.fetching) {
+    if (!loadingCreate && (home.create.fetching || home.update.fetching)) {
       document.querySelectorAll('.mb-4')[4].style.display = 'none'
-      this.setState({ loadingCreate: home.create.fetching })
+      this.setState({ loadingCreate: true })
     }
   }
   _toggleModalAdd = () => {
     const { show } = this.state;
-    this.setState({ show: !show })
+    this.setState({ show: !show, activeIdUpdate: null })
   }
   _handleSubmit = (value) => {
     const current = dayjs(), { actions: { postData, updateData } } = this.props, { activeIdUpdate } = this.state;;
@@ -152,7 +152,7 @@ export default class Home extends PureComponent {
   }
   _toggleSuccess = () => {
     const { showSuccess } = this.state, { actions: { getData } } = this.props;
-    this.setState({ showSuccess: !showSuccess }, () => {
+    this.setState({ showSuccess: !showSuccess, loadingCreate: showSuccess ? false : showSuccess }, () => {
       if (showSuccess) getData();
     });
   }
@@ -196,19 +196,34 @@ export default class Home extends PureComponent {
 
   _renderModalAdd = () => {
     const { show, loadingCreate, activeIdUpdate } = this.state, { home: { list:  { data } } } = this.props;
-    const cloneModel = Object.assign({}, model);
+    let cloneModel = { ...model };
     if (activeIdUpdate) {
       const findData = data.find((_) => _.uuid === activeIdUpdate);
-      cloneModel.Komoditas.defaultValue = findData.komoditas;
-      cloneModel.Ukuran.defaultValue = findData.size;
-      cloneModel.Harga.defaultValue = findData.price;
-      cloneModel.Area.defaultValue = `${findData.area_provinsi}, ${findData.area_kota}`;
+      cloneModel = {
+        ...model,
+        Komoditas: {
+          ...model.Komoditas,
+          defaultValue: findData.komoditas
+        },
+        Ukuran: {
+          ...model.Ukuran,
+          defaultValue: findData.size
+        },
+        Harga: {
+          ...model.Harga,
+          defaultValue: findData.price
+        },
+        Area: {
+          ...model.Area,
+          defaultValue: `${findData.area_provinsi}, ${findData.area_kota}`
+        }
+      }
     }
     return (
       <Modal isOpen={show} toggle={this._toggleModalAdd}>
         <ModalHeader toggle={this._toggleModalAdd}>{`${activeIdUpdate ? 'Ubah' : 'Tambah'} Data`}</ModalHeader>
         <ModalBody>
-          <JsonToForm model={model} onSubmit={this._handleSubmit} />
+          <JsonToForm model={cloneModel} onSubmit={this._handleSubmit} />
           <div className="col-sm-4 offset-sm-4">
             {loadingCreate && <ReactLoading type="spin" color="#038767" height={38} width={38} />}
           </div>
