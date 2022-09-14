@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import JsonToForm from 'json-reactform';
 import { Helmet } from 'react-helmet';
-import { Modal, Button, ModalHeader, ModalBody, ModalFooter, Nav } from 'reactstrap';
+import { Modal, Button, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { v4 } from 'uuid';
 import dayjs from 'dayjs';
 import ReactLoading from 'react-loading';
@@ -125,7 +125,7 @@ export default class Home extends PureComponent {
     }
     if (show && home.create.data) this.setState({ show: false, showSuccess: 'Sukses menambahkan data' })
     if (activeIdDelete && home.delete.data) this.setState({ activeIdDelete: null, showSuccess: 'Sukses menghapus data' })
-    if (activeIdUpdate && home.update.data) this.setState({ show: false, activeIdUpdate: null, showSuccess: 'Sukses memperbaharui data' })
+    if (activeIdUpdate && home.update.data) this.setState({ show: false, showSuccess: 'Sukses memperbaharui data' })
 
     if (!loadingCreate && (home.create.fetching || home.update.fetching)) {
       document.querySelectorAll('.mb-4')[4].style.display = 'none'
@@ -152,7 +152,7 @@ export default class Home extends PureComponent {
   }
   _toggleSuccess = () => {
     const { showSuccess } = this.state, { actions: { getData } } = this.props;
-    this.setState({ showSuccess: !showSuccess, loadingCreate: showSuccess ? false : showSuccess }, () => {
+    this.setState({ showSuccess: !showSuccess, loadingCreate: showSuccess ? false : showSuccess, activeIdUpdate: null }, () => {
       if (showSuccess) getData();
     });
   }
@@ -178,7 +178,7 @@ export default class Home extends PureComponent {
   }
 
   _renderModalConfirmDelete = () => {
-    const { activeIdDelete } = this.state, { home: { list: { data } } } = this.props;
+    const { activeIdDelete } = this.state, { home: { list: { data }, delete: { fetching } } } = this.props;
     const findData = data.find((_) => _.uuid === activeIdDelete);
     return (
       <Modal isOpen={Boolean(activeIdDelete)} toggle={this._cancelDelete}>
@@ -187,8 +187,12 @@ export default class Home extends PureComponent {
           <p className="msg-success">Apakah anda yakin akan menghapus data {findData?.komoditas} ?</p>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={this._cancelDelete} color="primary">Batal</Button>
-          <Button onClick={this._confirmDelete} color="primary">OK</Button>
+        {fetching ? <ReactLoading type="spin" color="#038767" height={38} width={38} /> : (
+          <>
+            <Button onClick={this._cancelDelete} color="primary">Batal</Button>
+            <Button onClick={this._confirmDelete} color="primary">OK</Button>
+          </>
+        )}
         </ModalFooter>
       </Modal>
     )
@@ -275,7 +279,19 @@ export default class Home extends PureComponent {
     return (
       <>
         <Helmet>
-          <title>Lauks!</title>
+          <title>Lauks </title>
+          <meta name="title" content="Lauks" />
+          <meta name="description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
+
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://lauks.vercel.app/" />
+          <meta property="og:title" content="Lauks" />
+          <meta property="og:description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
+
+          <meta property="twitter:card" content="summary_large_image" />
+          <meta property="twitter:url" content="https://lauks.vercel.app/" />
+          <meta property="twitter:title" content="Lauks" />
+          <meta property="twitter:description" content="Pantau harga ikan dari berbagai daerah sekarang juga !" />
         </Helmet>
         <div className="container">
           <Navbar toggleModalAdd={this._toggleModalAdd} />
