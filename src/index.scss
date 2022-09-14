@@ -25,6 +25,9 @@
 footer {
   p {
     a {
+      &:active, &:hover {
+        color: #fff;
+      }
       color: #fff;
     }
     margin: 0;

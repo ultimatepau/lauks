@@ -153,7 +153,12 @@ export default class Home extends PureComponent {
   _toggleSuccess = () => {
     const { showSuccess } = this.state, { actions: { getData } } = this.props;
     this.setState({ showSuccess: !showSuccess, loadingCreate: showSuccess ? false : showSuccess, activeIdUpdate: null }, () => {
-      if (showSuccess) getData();
+      if (showSuccess) {
+        setTimeout(() => {
+          document.querySelector('body').style.overflow = 'visible';
+        }, 1000);
+        getData();
+      }
     });
   }
   _renderModalSuccess = () => {
@@ -190,7 +195,7 @@ export default class Home extends PureComponent {
         {fetching ? <ReactLoading type="spin" color="#038767" height={38} width={38} /> : (
           <>
             <Button onClick={this._cancelDelete} color="primary">Batal</Button>
-            <Button onClick={this._confirmDelete} color="primary">OK</Button>
+            <Button onClick={this._confirmDelete} color="danger">OK</Button>
           </>
         )}
         </ModalFooter>
@@ -270,7 +275,7 @@ export default class Home extends PureComponent {
       name: 'Aksi',
       selector: row => (
         <>
-          <Button onClick={this._handleEdit.bind(this, row)} size="sm" style={{ marginRight: 5 }} color="info">Ubah</Button>
+          <Button onClick={this._handleEdit.bind(this, row)} size="sm" style={{ marginRight: 5 }} color="primary">Ubah</Button>
           <Button onClick={this._handleDelete.bind(this, row)} size="sm" color="danger">Hapus</Button>
         </>
       ),
