@@ -19,7 +19,7 @@
     }
   ],
   "start_url": "https://lauks.vercel.app",
-  "scope": "https://ondersumer07.github.io/vinematik",
+  "scope": "https://lauks.vercel.app",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
